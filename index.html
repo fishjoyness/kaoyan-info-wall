@@ -131,14 +131,35 @@
     header .inner{flex-direction:column;align-items:flex-start}
   }
 </style>
-</head>
+<script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
+<script>
+(function(){
+  try{
+    var beacon=new BeaconAction({
+      appkey:'0WEB06U85YBSLJNL',
+      versionCode:'1.0.0',
+      channelID:'share',
+      delay:1000,
+      sessionDuration:30*60*1000,
+      isOversea:false,
+      needReportRqdEvent:false
+    });
+    beacon.onDirectUserAction('preview_page_view',{
+      'url':location.href,
+      'referrer':document.referrer,
+      'title':document.title,
+      'sandbox_id':'848b34de1ab44e27bc63c5f0de24665c'
+    });
+  }catch(e){}
+})();
+</script></head>
 <body>
 
 <header>
   <div class="inner">
     <div>
       <h1>计算机考研信息墙 <small>· 仅 985 / 211 · 过滤焦虑</small></h1>
-      <div class="meta" id="meta">数据快照：2026-08-11 10:37 · 下次自动刷新：明日 09:45 · 想立即更新跟我说「刷新信息墙」</div>
+      <div class="meta" id="meta">数据快照：2026-08-11 04:31 · 自动刷新（GitHub Actions）· 想手动更新跟我说「刷新信息墙」</div>
     </div>
     <div class="controls">
       <div class="seg" id="timeSeg">
@@ -174,19 +195,19 @@ const DATA = {
   targetSchools: ['中山大学', '南京大学', '上海交通大学'],
   items: [
     // ========== 今日要闻（24h，仅计算机方向，8/11 更新）==========
-    {id:'t1', when:'24h', type:'985', topic:'招生', source:'中科院 · 软件研究所', time:'8/11',
+    {id:'t1', when:'7d', type:'985', topic:'招生', source:'中科院 · 软件研究所', time:'8/11',
      title:'2027 推免预报名公告（含硕士/直博）',
      summary:'中科院软件所（计算机一级学科）27 推免预报名启动。外语考核考查听说能力。拟录取后须通过教育部推免服务系统（9 月底开通）完成确认。线下面试者享往返交通补助。',
      url:'https://www.iscas.ac.cn/yjsjy/zsxx/202608/t20260811_8259909.html'},
-    {id:'t2', when:'24h', type:'985', topic:'招生', source:'浙江大学 · 全校外校推免', time:'8/11',
+    {id:'t2', when:'7d', type:'985', topic:'招生', source:'浙江大学 · 全校外校推免', time:'8/11',
      title:'2027 接收外校推免研究生工作安排通知',
      summary:'全校统一报名入口：研究生招生服务系统。各学院报名起止时间/联系方式/报考说明见官网汇总页。每人只能填报 1 个志愿。已报名夏令营者须再次进入系统申请免试生。',
      url:'https://www.163.com/dy/article/L40U64900516ARVT.html'},
-    {id:'t3', when:'24h', type:'985', topic:'招生', source:'湖南大学 · 半导体学院（集成电路）', time:'8/11',
+    {id:'t3', when:'7d', type:'985', topic:'招生', source:'湖南大学 · 半导体学院（集成电路）', time:'8/11',
      title:'2027 招生关键信息（含 085400 电子信息，欢迎计算机类报考）',
      summary:'招生专业：080900 电子科学与技术、140100 集成电路科学与工程、085400 电子信息。硕士生指标 160 人左右。明确欢迎计算机/测控/电气/材料等相关专业报考。',
      url:'https://sic.hnu.edu.cn/info/1115/2407.htm'},
-    {id:'t4', when:'24h', type:'其他', topic:'招生', source:'中科院 · 国家授时中心', time:'8/11',
+    {id:'t4', when:'7d', type:'其他', topic:'招生', source:'中科院 · 国家授时中心', time:'8/11',
      title:'2027 推免预报名（截止 9/22）',
      summary:'国科大体系，授时中心招生专业以 2026 推免目录为准。复试含业务能力+英语听说+综合素质，面试≥20 分钟。所有材料合成为 1 个 PDF 提交。',
      url:'https://ntsc.cas.cn/xwzx_/zsxx/202608/t20260811_8259912.html'},
