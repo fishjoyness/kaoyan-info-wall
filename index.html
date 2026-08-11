@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>计算机考研信息墙 · 985/211</title>
+<style>
+  :root{
+    --bg:#fafaf7; --card:#ffffff; --text:#1a1a1a; --muted:#6b6b66; --hint:#9a9a93;
+    --border:#e8e6dd; --border2:#d8d6cb;
+    --tag-985:#534AB7; --tag-985-bg:#EEEDFE;
+    --tag-211:#185FA5; --tag-211-bg:#E6F1FB;
+    --tag-tool:#0F6E56; --tag-tool-bg:#E1F5EE;
+    --tag-exp:#854F0B; --tag-exp-bg:#FAEEDA;
+    --tag-art:#993556; --tag-art-bg:#FBEAF0;
+    --tag-retest:#0C447C; --tag-retest-bg:#E6F1FB;
+    --tag-adjust:#712B13; --tag-adjust-bg:#FAECE7;
+    --tag-target:#26215C; --tag-target-bg:#EEEDFE;
+    --accent:#26215C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 60px}
+
+  header{
+    position:sticky;top:0;z-index:30;
+    background:rgba(250,250,247,.94);backdrop-filter:blur(8px);
+    border-bottom:0.5px solid var(--border);
+    padding:12px 20px 0;
+  }
+  header .inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  header h1{font-size:17px;font-weight:500;letter-spacing:.3px}
+  header h1 small{font-size:12px;color:var(--muted);font-weight:400;margin-left:8px}
+  header .meta{font-size:11px;color:var(--hint);margin-top:2px}
+  .controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .seg{display:inline-flex;background:var(--card);border:0.5px solid var(--border2);border-radius:8px;padding:2px}
+  .seg button{
+    border:none;background:transparent;cursor:pointer;
+    padding:5px 12px;font-size:12px;color:var(--muted);border-radius:6px;
+    font-family:inherit;
+  }
+  .seg button.on{background:var(--accent);color:#fff}
+  .filters{display:inline-flex;gap:4px;flex-wrap:wrap}
+  .filters button{
+    border:0.5px solid var(--border2);background:var(--card);
+    padding:5px 10px;font-size:12px;border-radius:14px;cursor:pointer;
+    color:var(--muted);font-family:inherit;
+  }
+  .filters button.on{background:var(--tag-target-bg);color:var(--tag-target);border-color:transparent}
+  .filters button.tgt{background:#fff6db;color:#854F0B;border-color:#f0d488}
+  .filters button.tgt.on{background:#854F0B;color:#fff;border-color:transparent}
+
+  nav.tabs{
+    position:sticky;top:54px;z-index:20;
+    background:rgba(250,250,247,.94);backdrop-filter:blur(8px);
+    border-bottom:0.5px solid var(--border);
+    padding:8px 20px;
+  }
+  nav.tabs .inner{max-width:1180px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+  nav.tabs a{
+    flex:0 0 auto;padding:6px 12px;font-size:12px;border-radius:16px;
+    background:var(--card);border:0.5px solid var(--border2);color:var(--muted);
+    white-space:nowrap;cursor:pointer;
+  }
+  nav.tabs a:hover{border-color:var(--accent);color:var(--accent)}
+  nav.tabs a .n{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;background:var(--bg);border-radius:8px;font-size:10px;color:var(--hint)}
+
+  main{margin-top:18px}
+  .module{margin-bottom:38px;scroll-margin-top:108px}
+  .module > h2{
+    font-size:14px;font-weight:500;color:var(--accent);
+    border-left:3px solid var(--accent);padding-left:10px;margin-bottom:14px;
+    display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px;
+  }
+  .module > h2 .desc{font-size:11px;color:var(--hint);font-weight:400;border:none;padding:0}
+
+  .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+  .item{
+    background:var(--card);border:0.5px solid var(--border);border-radius:10px;
+    padding:12px 14px;display:flex;flex-direction:column;gap:6px;
+    transition:border-color .15s,transform .15s;
+    position:relative;
+  }
+  .item:hover{border-color:var(--border2);transform:translateY(-1px)}
+  .item.tgt{border-color:#f0d488;border-width:1.5px;background:#fffdf5}
+  .item.tgt::before{
+    content:'★ 目标校';position:absolute;top:-7px;right:10px;
+    font-size:10px;background:#854F0B;color:#fff;padding:1px 7px;border-radius:8px;font-weight:500;
+  }
+  .item .head{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .tag{font-size:10px;padding:1px 7px;border-radius:4px;font-weight:500;letter-spacing:.2px}
+  .tag.t985{background:var(--tag-985-bg);color:var(--tag-985)}
+  .tag.t211{background:var(--tag-211-bg);color:var(--tag-211)}
+  .tag.tool{background:var(--tag-tool-bg);color:var(--tag-tool)}
+  .tag.exp{background:var(--tag-exp-bg);color:var(--tag-exp)}
+  .tag.art{background:var(--tag-art-bg);color:var(--tag-art)}
+  .tag.retest{background:var(--tag-retest-bg);color:var(--tag-retest)}
+  .tag.adjust{background:var(--tag-adjust-bg);color:var(--tag-adjust)}
+  .src{font-size:11px;color:var(--hint)}
+  .time{font-size:11px;color:var(--hint);margin-left:auto}
+  .ttl{font-size:14px;font-weight:500;color:var(--text);line-height:1.45}
+  .item a.ttl:hover{color:var(--tag-985)}
+  .sum{font-size:12px;color:var(--muted);line-height:1.55}
+  .link{font-size:11px;color:var(--tag-985);margin-top:auto;display:inline-flex;align-items:center;gap:3px}
+  .link:hover{text-decoration:underline}
+
+  .empty{
+    grid-column:1/-1;text-align:center;color:var(--hint);
+    padding:30px 10px;font-size:12px;background:var(--card);
+    border:0.5px dashed var(--border2);border-radius:10px;
+  }
+
+  footer{
+    margin-top:30px;padding:18px 20px;text-align:center;
+    font-size:11px;color:var(--hint);line-height:1.7;
+    border-top:0.5px solid var(--border);
+  }
+  footer .next{
+    display:inline-block;margin-top:8px;padding:5px 12px;
+    background:var(--tag-985-bg);color:var(--tag-985);
+    border-radius:14px;font-size:11px;
+  }
+
+  @media(max-width:680px){
+    .list{grid-template-columns:1fr}
+    header .inner{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <div>
+      <h1>计算机考研信息墙 <small>· 仅 985 / 211 · 过滤焦虑</small></h1>
+      <div class="meta" id="meta">数据快照：2026-08-11 10:37 · 下次自动刷新：明日 09:45 · 想立即更新跟我说「刷新信息墙」</div>
+    </div>
+    <div class="controls">
+      <div class="seg" id="timeSeg">
+        <button data-t="24h" class="on">24 小时</button>
+        <button data-t="7d">7 天</button>
+      </div>
+      <div class="filters" id="filterSeg">
+        <button data-f="all" class="on">全部</button>
+        <button data-f="985">985</button>
+        <button data-f="211">211</button>
+        <button data-f="tgt" class="tgt">★ 我的目标校</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="inner" id="navTabs"></div>
+</nav>
+
+<div class="wrap">
+<main id="main"></main>
+
+<footer>
+  本信息墙数据为静态快照，每天可刷新 · 想要更新数据时跟我说一声「刷新信息墙」，我会重新抓取 985/211 计算机方向的招生动态、改考通知、复试经验、调剂信息与公众号好文<br>
+  <span class="next">★ 目标校：中山大学 / 南京大学 / 上海交通大学</span>
+</footer>
+</div>
+
+<script>
+const DATA = {
+  updatedAt: '2026-08-10 17:00',
+  targetSchools: ['中山大学', '南京大学', '上海交通大学'],
+  items: [
+    // ========== 今日要闻（24h，仅计算机方向，8/11 更新）==========
+    {id:'t1', when:'24h', type:'985', topic:'招生', source:'中科院 · 软件研究所', time:'8/11',
+     title:'2027 推免预报名公告（含硕士/直博）',
+     summary:'中科院软件所（计算机一级学科）27 推免预报名启动。外语考核考查听说能力。拟录取后须通过教育部推免服务系统（9 月底开通）完成确认。线下面试者享往返交通补助。',
+     url:'https://www.iscas.ac.cn/yjsjy/zsxx/202608/t20260811_8259909.html'},
+    {id:'t2', when:'24h', type:'985', topic:'招生', source:'浙江大学 · 全校外校推免', time:'8/11',
+     title:'2027 接收外校推免研究生工作安排通知',
+     summary:'全校统一报名入口：研究生招生服务系统。各学院报名起止时间/联系方式/报考说明见官网汇总页。每人只能填报 1 个志愿。已报名夏令营者须再次进入系统申请免试生。',
+     url:'https://www.163.com/dy/article/L40U64900516ARVT.html'},
+    {id:'t3', when:'24h', type:'985', topic:'招生', source:'湖南大学 · 半导体学院（集成电路）', time:'8/11',
+     title:'2027 招生关键信息（含 085400 电子信息，欢迎计算机类报考）',
+     summary:'招生专业：080900 电子科学与技术、140100 集成电路科学与工程、085400 电子信息。硕士生指标 160 人左右。明确欢迎计算机/测控/电气/材料等相关专业报考。',
+     url:'https://sic.hnu.edu.cn/info/1115/2407.htm'},
+    {id:'t4', when:'24h', type:'其他', topic:'招生', source:'中科院 · 国家授时中心', time:'8/11',
+     title:'2027 推免预报名（截止 9/22）',
+     summary:'国科大体系，授时中心招生专业以 2026 推免目录为准。复试含业务能力+英语听说+综合素质，面试≥20 分钟。所有材料合成为 1 个 PDF 提交。',
+     url:'https://ntsc.cas.cn/xwzx_/zsxx/202608/t20260811_8259912.html'},
+
+    // ========== 8/10 历史条目（降级为 7d）==========
+    {id:'t5', when:'7d', type:'985', topic:'招生', source:'华东师范大学 · 智能交互学院', time:'8/10',
+     title:'2027 推免预报名公告（人工智能/计算机/软件工程方向）',
+     summary:'接收专业：085410 人工智能、081200 计算机科学与技术、085405 软件工程、085403 集成电路工程。每生最多 2 个志愿。',
+     url:'https://m.chinakaoyan.com/info/article/id/675661.shtml'},
+    {id:'t6', when:'7d', type:'211', topic:'招生', source:'北京科技大学 · 各学院', time:'8/10',
+     title:'2027 推免预报名（含人工智能/材料）至 8/21 截止',
+     summary:'8/21 24:00 截止报名。3 分钟个人自述 PPT 含学科竞赛/科研成果。',
+     url:'https://me.ustb.edu.cn/tzgg/08016cfc110a4477996a7d5081b8e357.htm'},
+    {id:'t7', when:'7d', type:'其他', topic:'招生', source:'中央财经大学 · 信息学院', time:'8/10',
+     title:'推免报名至 8/31 截止（含新增「财经智能科学与技术」）',
+     summary:'8/31 12:00 系统关闭。新增「财经智能科学与技术」「信息系统与信息管理」专业，AI+财经交叉方向，3 年制。',
+     url:'https://sind.cufe.edu.cn/info/1052/4636.htm'},
+
+    // ========== 我的目标校模块（中山大学 / 南京大学 / 上海交通大学）==========
+    {id:'g1', when:'7d', type:'985', isTarget:true, topic:'招生', source:'中山大学 · 计算机学院', time:'7 月',
+     title:'2027 推免接收报名通知（计算机/计算数学/计算机技术）',
+     summary:'直博 5 年 / 硕士 3 年。复试含机试+面试，机试成绩仅供参考。复试总分 100（英语 30% + 业务能力 70%），硕士面试≥20 分钟，直博≥30 分钟。',
+     url:'https://cse.sysu.edu.cn/article/3587'},
+    {id:'g2', when:'7d', type:'985', isTarget:true, topic:'招生', source:'南京大学 · 计算机学院', time:'7 月',
+     title:'2027 推免接收报名通知',
+     summary:'26 届计算机学院总录取 188 人，直博占比接近 1/4。南大计算机学科评估 A 级。先进制造学院 27 年首次招生。',
+     url:'https://cs.nju.edu.cn/d4/59/c1702a840793/pagem.htm'},
+    {id:'g3', when:'7d', type:'985', isTarget:true, topic:'招生', source:'南京大学 · 人工智能学院 · LAMDA', time:'7 月',
+     title:'2027 推免预报名 + LAMDA 实验室招生（周志华团队）',
+     summary:'LAMDA 27 年招生导师 20 人，含直博/硕士。研究动机说明 1 页 + 普通生活照简历。CMT 系统提交，3 位导师志愿+是否服从分配。',
+     url:'https://ai.nju.edu.cn/d4/5c/c53055a840796/page.htm'},
+    {id:'g4', when:'7d', type:'985', isTarget:true, topic:'招生', source:'上海交通大学 · 计算机学院', time:'7 月',
+     title:'2027 夏令营入营 1059 人（计算机 719 / 网安 200 / 电子信息 140）',
+     summary:'入营同比扩招 339 人。26 届计算机学院拟录取推免 402 人（硕士 183 + 直博 219）。生源地：计算机科学与技术/软件工程/人工智能/信息安全等。',
+     url:'https://www.sohu.com/a/1055680500_121124300'},
+    {id:'g5', when:'all', type:'985', isTarget:true, topic:'结构', source:'上海交通大学 · 数学学院', time:'6/24',
+     title:'2027 起停招数学学硕',
+     summary:'上交数学学院 27 起不再招收数学学硕。计算机学院未停招，但学硕推免占比 60%+，统考通道持续收窄。',
+     url:'https://www.jiaoyubao.cn/news/n375233.html'},
+
+    // ========== 院校动态（其他 985/211 改考/停招/新增） ==========
+    {id:'w1', when:'7d', type:'211', topic:'改考', source:'江苏海洋大学 · 计算机工程学院', time:'8/4',
+     title:'新增 085410 人工智能专业，初试考 408',
+     summary:'数二 + 408 计算机统考。又一校加入「408 阵营」，可作为保底/备选样本。',
+     url:'https://yz.chsi.com.cn/kyzx/yxzc/202608/20260804/2293875752.html'},
+    {id:'w2', when:'7d', type:'985', topic:'招生', source:'浙大软件学院', time:'8/7',
+     title:'2027 推免简章：人工智能 93 / 软件工程 127 / 直博 33',
+     summary:'A+ 学科，培养地宁波，学制 3 年 / 8 万全程。招生体量与方向设置是判断「AI 扩招」的硬数据。',
+     url:'http://www.cst.zju.edu.cn/2026/0807/c32178a3193932/page.htm'},
+    {id:'w3', when:'7d', type:'985', topic:'招生', source:'哈工大（威海）· 计算机学院', time:'8/3',
+     title:'2027 推免接收通知',
+     summary:'明确「毕业专业原则上为计算机/软件/网安/人工智能」。给出计算类跨专业申硕的边界参考。',
+     url:'https://cst.hitwh.edu.cn/2026/0803/c371a216545/page.htm'},
+    {id:'w4', when:'7d', type:'985', topic:'招生', source:'中科院 · 计算机网络信息中心', time:'8/4',
+     title:'2027 推免简章（含直博）',
+     summary:'国科大计算机 A+ 学科参建单位，AI4S / 科学智能体方向——选题灵感富矿。',
+     url:'https://www.cnic.cas.cn/yjsjy/zsxx/tjms/202608/t20260804_8259075.html'},
+    {id:'w5', when:'7d', type:'985', topic:'改考', source:'清华大学 · 计算机系', time:'7 月',
+     title:'电子信息专业 826 → 408',
+     summary:'清华计算机系 27 起加入 408 统考。顶尖院校统考化标志性事件。',
+     url:'https://kaoyan.xdf.cn/202608/15320316.html'},
+    {id:'w6', when:'7d', type:'985', topic:'改考', source:'北京航空航天大学 · 网络空间安全学院', time:'7 月',
+     title:'全院改考 408',
+     summary:'北航网安全院 27 起统一 408。统考化在头部 985 持续扩散。',
+     url:'https://kaoyan.xdf.cn/202608/15320316.html'},
+    {id:'w7', when:'7d', type:'211', topic:'改考', source:'北京邮电大学 · 人工智能/数字媒体学院', time:'7 月',
+     title:'809 数据结构 → 408',
+     summary:'北邮两个学院改 408。作为「互联网大厂输送基地」，改考后竞争格局同步变化。',
+     url:'https://kaoyan.xdf.cn/202608/15320316.html'},
+    {id:'w8', when:'7d', type:'211', topic:'改考', source:'北京交通大学 · 人工智能', time:'7 月',
+     title:'改考 408',
+     summary:'北交人工智能专业 27 起改 408。',
+     url:'https://kaoyan.xdf.cn/202608/15320316.html'},
+    {id:'w9', when:'7d', type:'211', topic:'改考', source:'北京科技大学 · 软件工程', time:'7 月',
+     title:'改考 408',
+     summary:'北科软件工程 27 起改 408。',
+     url:'https://kaoyan.xdf.cn/202608/15320316.html'},
+    {id:'w10', when:'7d', type:'985', topic:'改考', source:'电子科技大学', time:'7 月',
+     title:'全面统考化',
+     summary:'电子科大计算机类 27 起全面统考化。成电是西部计算机龙头之一。',
+     url:'https://kaoyan.xdf.cn/202608/15320316.html'},
+    {id:'w11', when:'7d', type:'985', topic:'改考', source:'华南理工大学', time:'7 月',
+     title:'全面统考化（计算机学硕/专硕已用 408）',
+     summary:'华南理工 26 起计算机学硕/专硕已 408，27 起进一步全面统考化。',
+     url:'https://kaoyan.xdf.cn/202608/15320316.html'},
+    {id:'w12', when:'7d', type:'985', topic:'结构', source:'复旦大学 · 数学学院', time:'4/14',
+     title:'2027 起停招学硕（专项计划除外）',
+     summary:'扩大博士招生规模，以招收直博生为主。学硕转「博士预备队」通道的标志性事件。',
+     url:'https://www.jiaoyubao.cn/news/n375233.html'},
+    {id:'w13', when:'7d', type:'985', topic:'结构', source:'浙江大学 · 10+ 学院', time:'6/15',
+     title:'电气/计算机/材料/经济/控制/建筑等 27 年仅招专硕',
+     summary:'浙大集中公告：2027 年仅招收全日制专硕。数学/化学仅通过推免「国优计划」等专项招收。',
+     url:'https://www.jiaoyubao.cn/news/n375233.html'},
+    {id:'w14', when:'7d', type:'其他', topic:'时间', source:'扬州大学 MBA · 招生简章', time:'8 月',
+     title:'27 考研初试预计 2026-12-19',
+     summary:'距初试约 5 个月。9 月咨询周 → 9 月下预报名 → 10 月正报 → 11 月确认 → 12 月考试，节奏锁定。',
+     url:'https://www.mbachina.com/html/xw/202608/656827.html'},
+
+    // ========== 经验帖精选（知乎高赞 + 小红书 + CSDN） ==========
+    {id:'e1', when:'all', type:'985', topic:'经验', source:'橙啦考研 · 学员复盘', time:'25 考研',
+     title:'从挂科到上岸 985：普通 211 学员跨考计算机 387 分完整复盘',
+     summary:'华科计算机上岸。报录比分析、跨考录取比例、408 零基础 129 分方法、动态调整计划。知乎高赞。',
+     url:'https://www.orangevip.com/consultDetail/82/861'},
+    {id:'e2', when:'all', type:'985', topic:'经验', source:'CSDN · 专栏', time:'26 考研',
+     title:'双非逆袭北邮网安：实战路线图与避坑指南',
+     summary:'初试后一周压线进复试的逆袭法：密码学+网安分类整理、3 分钟英文自我介绍+20 题关键词卡、408 思维导图速过。',
+     url:'https://blog.csdn.net/weixin_32822843/article/details/161883712'},
+    {id:'e3', when:'all', type:'985', topic:'经验', source:'科软上岸学长', time:'26 考研',
+     title:'双非二战逆袭科软：408 高分突围与机试决胜复盘',
+     summary:'三刷法（A3 思维导图+Excel 高频统计+错题改编变体题）。湖科大教书匠计网视频押中 IP 分片题。自建 150 道原创题。',
+     url:'http://www.tzjp.cn/news/37176'},
+    {id:'e4', when:'all', type:'985', topic:'经验', source:'CSDN · 专栏', time:'26 考研',
+     title:'华师大计算机学硕上岸攻略：408 与机试备考全解析',
+     summary:'初试 380+，机试+面试。3-6 月啃教材（严蔚敏/唐朔飞/汤子瀛/谢希仁）建立框架。华为 OD 机试题作为高质量练习库。',
+     url:'https://wenku.csdn.net/column/xcp76i77183'},
+    {id:'e5', when:'all', type:'其他', topic:'经验', source:'考研之星 · 江西财经大学', time:'26 考研',
+     title:'查钧文：以坚守破迷茫，以笃行赴前程',
+     summary:'408 一轮 3-7 月跟王道只做选择题 → 二轮 8-10 月强化+大题思路 → 三轮 11-12 月刷 09-25 真题。数学 660+880+郭伟/李艳芳真题。',
+     url:'https://iei.jxut.edu.cn/info/1018/4922.htm'},
+    {id:'e6', when:'all', type:'其他', topic:'经验', source:'起航考研', time:'27 考研',
+     title:'408 各阶段用书 + 老师 + 时间轴（每日 2h，135 分上岸）',
+     summary:'复习顺序 C→数据结构→计组→OS→计网。吴迪(C语言)/刘财政(数据结构)/游涛(计组)/张方方(OS)/严一安(计网)。',
+     url:'https://jixun.iqihang.com/info/zykzd/jsj/2026746155.html'},
+    {id:'e7', when:'all', type:'其他', topic:'经验', source:'小红书 · 江苏师范大学 · 丁娜', time:'26 考研',
+     title:'小红书搜集目标院校真实评价与「避雷」信息',
+     summary:'初试 340 上岸江苏师大计算机技术。重点推荐用小红书搜目标校「压分/歧视」避雷帖，自己发帖大概率学长学姐会来找你。直系学长学姐是最优信息源。',
+     url:'https://sie.squ.edu.cn/info/1111/4091.htm'},
+    {id:'e8', when:'all', type:'其他', topic:'经验', source:'CSDN', time:'27 考研',
+     title:'408 高效备考路线图：从零基础到高分突破',
+     summary:'王道全家桶为主+天勤数据结构为辅+教材当词典。6-8 个月三阶段（基础/强化/冲刺）。紧扣考纲、抓大放小、反复迭代、真题为王。',
+     url:'https://blog.csdn.net/weixin_29219189/article/details/158711129'},
+
+    // ========== 复试攻略模块 ==========
+    {id:'r1', when:'all', type:'985', isTarget:true, topic:'复试', source:'N 诺考研 · 南大真题', time:'25 考研',
+     title:'南大机试真题与复试流程（计算机学院）',
+     summary:'复试总分 300：笔试 150（离散 70+编译 80）+ 面试 100 + 上机 50。机试 2 小时三道题（如 N 皇后/字符替换/约瑟夫环）。南大喜欢考 DP、树和图的建模与搜索。',
+     url:'https://www.noobdream.com/schoolinfo/17/'},
+    {id:'r2', when:'all', type:'985', isTarget:true, topic:'复试', source:'中山大学 · 计算机学院', time:'27 推免',
+     title:'中大有别于其他校：机试成绩不计入复试总分',
+     summary:'复试总分 100（英语 30% + 业务能力及综合素质 70%）。机试成绩仅供评委参考。复试小组现场独立评分，算术平均为最终成绩。复试全程录音录像。',
+     url:'https://www.okaoyan.com/zhongshandaxue/byxly_991662.html'},
+    {id:'r3', when:'all', type:'985', isTarget:true, topic:'复试', source:'上海交通大学 · 计算机学院', time:'27 推免',
+     title:'上交夏令营复试：机试+面试',
+     summary:'夏令营入营 1059 人，最终拟录取 402（硕士 183+直博 219）。复录比约 1:2.6。机试+面试是核心筛选环节。',
+     url:'https://www.sohu.com/a/1055680500_121124300'},
+    {id:'r4', when:'all', type:'其他', topic:'复试', source:'起航考研', time:'27 考研',
+     title:'计算机考研复试考什么：四大模块与备考逻辑',
+     summary:'① 机试编程（LeetCode+目标院校真题）② 专业课笔试 ③ 英语面试（自我介绍+专业英语）④ 综合面试（项目经历 STAR 法则）。',
+     url:'https://jixun.iqihang.com/info/zykzd/jsj/2026774167.html'},
+    {id:'r5', when:'all', type:'其他', topic:'复试', source:'CSDN · 专栏', time:'26 考研',
+     title:'计算机保研实战：408 专业课到机试面试全面备战',
+     summary:'项目经历用 STAR 法则：背景-目标-角色-行动-结果-思考。1 分钟版+3 分钟版介绍。预设 6 个高频问题（Why/What/How/Result/Reflection/Connection）。',
+     url:'https://wenku.csdn.net/column/4o2nes938jr'},
+    {id:'r6', when:'all', type:'其他', topic:'复试', source:'0539edu', time:'26 版',
+     title:'408 计算机考研复试上机考试备考指南',
+     summary:'时间分配：简单题≤15min、中等 25-30min、难题 30-40min。前 5 分钟浏览全卷标记难度，最后 5 分钟检查语法/边界。考前 7 天每日一次全真模拟。',
+     url:'http://www.0539edu.com/news/1127848/'},
+
+    // ========== 调剂信息模块 ==========
+    {id:'a1', when:'all', type:'985', topic:'调剂', source:'新东方考研网', time:'26 调剂',
+     title:'2026 调剂规则：3 个平行志愿、锁定 24-36h',
+     summary:'调剂意向采集系统 3/27 开通，正式调剂服务系统 4/8 开通。每次开放不少于 12 小时。专硕一般不可调剂至学硕。统考科目需相同或相近。',
+     url:'https://kaoyan.xdf.cn/202607/15287044.html'},
+    {id:'a2', when:'all', type:'985', topic:'调剂', source:'好学教育网', time:'26 调剂',
+     title:'985/211 调剂成功率仅 10-15%，计算机调剂竞争比 8:1',
+     summary:'2026 调剂录取约 24-26 万，参与调剂 70 万，比例 24%。过国家线 20 分以上+专业匹配→成功率 50%+；擦线考生成功率不到 10%。',
+     url:'https://m.haoxue360.com/z/350732036.html'},
+    {id:'a3', when:'all', type:'211', topic:'调剂', source:'新东方考研网', time:'26 调剂',
+     title:'B 区 211 院校调剂清单：兰大/云南大学/贵州大学/广西大学等',
+     summary:'B 区 211/双一流 7 所均稳定释放调剂名额。新疆大学计算机科学与技术为双一流学科，地理位置偏远竞争压力小。广西大学工程/农学学科优势。',
+     url:'https://kaoyan.xdf.cn/202607/15287044.html'},
+    {id:'a4', when:'all', type:'其他', topic:'调剂', source:'新东方考研网', time:'26 调剂',
+     title:'408 统考考生调剂容错率高于自命题',
+     summary:'408 成绩全国通用，调剂选择面更广。多所双非院校对 408 考生设置加权加分，同等分数下优先录取 408 生源。自命题考生调剂范围狭窄。',
+     url:'https://kaoyan.xdf.cn/202607/15283016.html'},
+    {id:'a5', when:'all', type:'211', topic:'调剂', source:'申请方', time:'26 调剂',
+     title:'仍开放调剂的 211 热门专业（西电/北科/南航等）',
+     summary:'西电计算机/电子信息工程、北科材料/人工智能、南航飞行器/大数据、暨大新传/金融、华师教育技术/应用心理。',
+     url:'https://www.applysquare.com/topic/2R8CVwSWxWZ'},
+
+    // ========== 公众号/论坛好文 ==========
+    {id:'p1', when:'all', type:'其他', topic:'干货', source:'新东方考研网', time:'8/10',
+     title:'27 考研统考化全景图：七大学科门类改考清单一次看全',
+     summary:'计算机类 408 改考院校清单（清华/北邮/北航/北交/北科/电子科大/华南理工/深圳大学/云南大学等）。全国统考科目已增至 25 门。',
+     url:'https://kaoyan.xdf.cn/202608/15320316.html'},
+    {id:'p2', when:'all', type:'其他', topic:'干货', source:'新东方考研网', time:'8 月',
+     title:'8 月起！各校考研招生简章集中发布，考研人应该重点看什么？',
+     summary:'核对要点：① 科目代码变化 ② 参考书目增删/版本 ③ 公共课（英一/二、数一/二/三）。统考实际名额 = 总计划 − 推免人数。',
+     url:'https://kaoyan.xdf.cn/202608/15313777.html'},
+    {id:'p3', when:'all', type:'其他', topic:'干货', source:'新东方考研网', time:'8 月',
+     title:'27 考研院校密集调整：换参考、调大纲、改目录，三类信号',
+     summary:'换参考书→复习方向重排；调大纲→旧经验可能失效；改目录→报考逻辑要重估。8 月后还有调整陆续公布。',
+     url:'https://mtoutiao.xdf.cn/kaoyan/202608/15315047.html'},
+    {id:'p4', when:'all', type:'其他', topic:'干货', source:'新东方考研网', time:'8 月',
+     title:'专硕扩招学硕缩招深化：27 择校要看的结构性变化',
+     summary:'2026 年专硕占比 69.7%，2027 年稳定在 2/3。学硕定位转「博士预备队」。985 学硕推免占比已超 60%，部分专业仅保留直博。',
+     url:'https://kaoyan.xdf.cn/202608/15316748.html'},
+    {id:'p5', when:'all', type:'其他', topic:'干货', source:'今日头条 · MBAChina', time:'8/7',
+     title:'硕士毕业生首破 100 万，考研报名却少了 131 万',
+     summary:'报名 474→343 万三年降 27.6%。但结构性竞争仍在——优质院校/热门城市/职业回报明确的项目仍热。',
+     url:'https://www.toutiao.com/article/7671217606346506803'},
+    {id:'p6', when:'all', type:'其他', topic:'干货', source:'新东方考研网', time:'8 月',
+     title:'408 计算机统考深度科普：考纲范围、参考教材、备考思路',
+     summary:'408 全国平均分常年 60-80（满分 150）。先补 C 语言底座，按「数据结构→计组→操作系统→计网」顺序，5-6 月启动较理想。',
+     url:'https://kaoyan.xdf.cn/202607/15274418.html'},
+
+    // ========== 必备工具与网站 ==========
+    {id:'s1', when:'all', type:'tool', topic:'工具', source:'中国研究生招生信息网', time:'官方',
+     title:'研招网 · 推免服务系统 / 统考报名入口',
+     summary:'推免服务系统 9 月下旬开通；统考预报名 9 月下、正式报名 10 月、准考证打印 12 月。所有报名流程的官方入口。',
+     url:'https://yz.chsi.com.cn/'},
+    {id:'s2', when:'all', type:'tool', topic:'工具', source:'教育部学位中心', time:'官方',
+     title:'全国高校学科评估结果查询',
+     summary:'查计算机科学与技术、软件工程、网络空间安全等学科的 A+/A/A-/B+ 评级。择校第一参考。',
+     url:'https://www.cdgdc.edu.cn/dslxkpgjggb/'},
+    {id:'s3', when:'all', type:'tool', topic:'工具', source:'小木虫学术论坛', time:'论坛',
+     title:'小木虫 · 调剂信息最先出现的论坛',
+     summary:'国内高校共享信息最全面的学术论坛。各板块更新快，调剂期尤其活跃。',
+     url:'https://muchong.com/bbs/'},
+    {id:'s4', when:'all', type:'tool', topic:'工具', source:'王道计算机考研公众号', time:'持续更新',
+     title:'王道计算机考研 / 王道在线（公众号）',
+     summary:'400+ 所院校近 7 年考情分析、408 院校汇总、机试院校汇总、历年真题及解析、上岸经验合集。后台回复关键词获取资料。',
+     url:'https://b.mffb.com.cn/a/461848.html'},
+    {id:'s5', when:'all', type:'tool', topic:'工具', source:'王道考研官方教材', time:'27 版',
+     title:'王道 408 四件套（数据结构/计组/操作系统/计网）',
+     summary:'按考研大纲编写，课后选择题贴近真题风格。是绝大多数 408 考生的首选辅导书。',
+     url:'https://kaoyan.xdf.cn/202607/15274418.html'},
+    {id:'s6', when:'all', type:'tool', topic:'工具', source:'B 站', time:'免费',
+     title:'湖科大教书匠 · 计算机网络（B 站）',
+     summary:'讲解细致生动，是计算机网络入门与难点突破的口碑视频。作为王道书的补充。曾押中 24 考研 IP 分片原题。',
+     url:'https://www.bilibili.com'},
+    {id:'s7', when:'all', type:'tool', topic:'工具', source:'N 诺考研', time:'持续更新',
+     title:'N 诺考研 · 各校机试真题与复试流程库',
+     summary:'按院校整理机试真题、复试流程、笔试范围。南大/浙大/北航/华科等热门校机试题库完整。',
+     url:'https://www.noobdream.com/schoolinfo/17/'},
+    {id:'s8', when:'all', type:'tool', topic:'工具', source:'LeetCode + 剑指 Offer', time:'机试必备',
+     title:'LeetCode + 剑指 Offer + 程序员面试金典',
+     summary:'机试编程主战场。按题型刷：数组/字符串/链表/二叉树/动态规划/回溯/图论。目标院校有传统机试（浙大 PAT/北邮）必刷历年真题。',
+     url:'https://leetcode.cn'}
+  ]
+};
+
+// 焦虑关键词过滤
+const ANXIETY_WORDS = ['弃考','焦虑','压力','崩溃','最难','绝望','放弃','emo','想哭','内耗','煎熬','卷死','死磕','心态爆炸','怀疑人生','退意'];
+
+function isAnxiety(text){
+  return ANXIETY_WORDS.some(w => text.includes(w));
+}
+
+const main = document.getElementById('main');
+const timeSeg = document.getElementById('timeSeg');
+const filterSeg = document.getElementById('filterSeg');
+const navTabs = document.getElementById('navTabs');
+let curTime = '24h';
+let curFilter = 'all';
+
+const MODULES = [
+  {id:'today', title:'今日要闻', desc:'今日与近 7 天的高校招生动态', filter:(it)=>it.when===curTime},
+  {id:'target', title:'★ 我的目标校', desc:'中山大学 / 南京大学 / 上海交通大学', filter:(it)=>it.isTarget && it.topic==='招生'},
+  {id:'dynamic', title:'院校动态', desc:'985/211 改考统考 / 停招学硕 / 新增专业', filter:(it)=>['改考','结构','招生','时间'].includes(it.topic) && it.when==='7d' && !it.isTarget},
+  {id:'exp', title:'经验帖精选', desc:'知乎高赞 + 小红书 + CSDN 优质复盘', filter:(it)=>it.topic==='经验'},
+  {id:'retest', title:'复试攻略', desc:'机试真题 + 面试 + 项目陈述', filter:(it)=>it.topic==='复试'},
+  {id:'adjust', title:'调剂信息', desc:'规则 + B 区 211 + 408 优势', filter:(it)=>it.topic==='调剂'},
+  {id:'articles', title:'公众号论坛好文', desc:'新东方考研网 / 今日头条 / 起航考研', filter:(it)=>it.topic==='干货'},
+  {id:'tools', title:'必备工具与网站', desc:'官方入口 / 学科评估 / 论坛 / 教材 / 视频课', filter:(it)=>it.topic==='工具'}
+];
+
+function renderTabs(){
+  navTabs.innerHTML = '';
+  MODULES.forEach(m => {
+    const rawItems = DATA.items.filter(it => m.filter(it) && !isAnxiety((it.title||'')+(it.summary||'')));
+    const count = filterItems(rawItems).length;
+    if(count === 0) return;  // 空模块不显示 tab
+    const a = document.createElement('a');
+    a.href = '#mod-' + m.id;
+    a.innerHTML = m.title + '<span class="n">' + count + '</span>';
+    navTabs.appendChild(a);
+  });
+}
+
+function filterItems(arr){
+  if(curFilter === 'all') return arr;
+  if(curFilter === '985') return arr.filter(it => it.type === '985');
+  if(curFilter === '211') return arr.filter(it => it.type === '211');
+  if(curFilter === 'tgt') return arr.filter(it => it.isTarget);
+  return arr;
+}
+
+function buildModule(m){
+  const rawItems = DATA.items.filter(it => m.filter(it) && !isAnxiety((it.title||'')+(it.summary||'')));
+  const items = filterItems(rawItems);
+
+  // 当前筛选下没有匹配条目，整个模块不渲染（不再显示空占位符）
+  if(items.length === 0) return null;
+
+  const sec = document.createElement('section');
+  sec.className = 'module';
+  sec.id = 'mod-' + m.id;
+  const h = document.createElement('h2');
+  h.innerHTML = '<span>' + m.title + '</span><span class="desc">' + m.desc + '</span>';
+  sec.appendChild(h);
+
+  const list = document.createElement('div');
+  list.className = 'list';
+  items.forEach(it => list.appendChild(buildCard(it)));
+  sec.appendChild(list);
+  return sec;
+}
+
+function buildCard(it){
+  const card = document.createElement('div');
+  card.className = 'item' + (it.isTarget ? ' tgt' : '');
+
+  const head = document.createElement('div');
+  head.className = 'head';
+
+  if(it.type === '985' || it.type === '211'){
+    const t = document.createElement('span');
+    t.className = 'tag ' + (it.type === '985' ? 't985' : 't211');
+    t.textContent = it.type;
+    head.appendChild(t);
+  }
+  const topicMap = {改考:'exp',结构:'exp',招生:'art',经验:'exp',干货:'art',工具:'tool',复试:'retest',调剂:'adjust',时间:'art'};
+  if(topicMap[it.topic]){
+    const tt = document.createElement('span');
+    tt.className = 'tag ' + topicMap[it.topic];
+    tt.textContent = it.topic;
+    head.appendChild(tt);
+  }
+  const src = document.createElement('span');
+  src.className = 'src';
+  src.textContent = it.source;
+  head.appendChild(src);
+  const tm = document.createElement('span');
+  tm.className = 'time';
+  tm.textContent = it.time;
+  head.appendChild(tm);
+
+  card.appendChild(head);
+
+  const ttl = document.createElement('a');
+  ttl.className = 'ttl';
+  ttl.href = it.url;
+  ttl.target = '_blank';
+  ttl.rel = 'noopener noreferrer';
+  ttl.textContent = it.title;
+  card.appendChild(ttl);
+
+  if(it.summary){
+    const sum = document.createElement('div');
+    sum.className = 'sum';
+    sum.textContent = it.summary;
+    card.appendChild(sum);
+  }
+
+  const link = document.createElement('a');
+  link.className = 'link';
+  link.href = it.url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.textContent = '阅读原文 →';
+  card.appendChild(link);
+
+  return card;
+}
+
+function render(){
+  main.innerHTML = '';
+  MODULES.forEach(m => {
+    const sec = buildModule(m);
+    if(sec) main.appendChild(sec);  // 空模块跳过
+  });
+  renderTabs();
+}
+
+timeSeg.addEventListener('click', e => {
+  if(e.target.tagName !== 'BUTTON') return;
+  timeSeg.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+  e.target.classList.add('on');
+  curTime = e.target.dataset.t;
+  render();
+});
+
+filterSeg.addEventListener('click', e => {
+  if(e.target.tagName !== 'BUTTON') return;
+  filterSeg.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+  e.target.classList.add('on');
+  curFilter = e.target.dataset.f;
+  render();
+});
+
+render();
+</script>
+
+</body>
+</html>
